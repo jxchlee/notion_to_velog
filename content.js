@@ -62,7 +62,14 @@
           const velogUrl = await uploadToVelogViaBackground(imageData, filename);
           processed = processed.replace(fullMatch, `![${alt}](${velogUrl})`);
           successCount++;
-          await new Promise(r => setTimeout(r, 300));
+
+          // 20개마다 15초 대기 (마지막 배치 이후 제외)
+          if (successCount % 20 === 0 && i < attachments.length - 1) {
+            for (let sec = 15; sec > 0; sec--) {
+              updateToast(`⏸ 잠시 대기 중... ${sec}초 후 재개 (${successCount} / ${attachments.length} 완료)`);
+              await new Promise(r => setTimeout(r, 1000));
+            }
+          }
         } catch (err) {
           console.error(`[N2V] 이미지 처리 실패 (${uuid}):`, err);
           failed.push({ uuid, reason: err.message });
