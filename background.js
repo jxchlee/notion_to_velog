@@ -60,7 +60,8 @@ async function uploadViaMainWorld(tabId, imageData, filename) {
       }
 
       fd.append('image', blob, `image.${ext}`);
-      return fetch('https://v2.velog.io/api/v2/files/upload', {
+
+      const doUpload = () => fetch('https://v2.velog.io/api/v2/files/upload', {
         method: 'POST',
         body: fd,
         credentials: 'include'
@@ -70,6 +71,11 @@ async function uploadViaMainWorld(tabId, imageData, filename) {
           return r.json();
         })
         .then(d => d.url ?? d.image_url ?? d.path);
+
+      // 429 등 실패 시 2초 대기 후 1회 재시도
+      return doUpload().catch(
+        () => new Promise(r => setTimeout(r, 2000)).then(doUpload)
+      );
     },
     args: [imageData.data, imageData.mimeType, filename]
   });
