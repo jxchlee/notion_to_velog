@@ -62,6 +62,7 @@
           const velogUrl = await uploadToVelogViaBackground(imageData, filename);
           processed = processed.replace(fullMatch, `![${alt}](${velogUrl})`);
           successCount++;
+          await new Promise(r => setTimeout(r, 300));
         } catch (err) {
           console.error(`[N2V] 이미지 처리 실패 (${uuid}):`, err);
           failed.push({ uuid, reason: err.message });
