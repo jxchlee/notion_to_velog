@@ -1,6 +1,10 @@
 # Notion to Velog
 
+[한국어](README.ko.md) | **English**
+
 A Chrome extension for copy-pasting Notion content to Velog with automatic image upload.
+
+![preview](assets/preview.webp)
 
 Notion copies images as `![alt](attachment:UUID:filename)` — a format Velog cannot render. This extension intercepts the paste event on `velog.io/write`, uploads each image to the Velog CDN, and replaces the attachment URLs with the resulting CDN URLs before inserting the content into the editor.
 
