@@ -1,104 +1,66 @@
 # Notion to Velog
 
-[한국어](README.ko.md) | **English**
+**한국어** | [English](README.en.md)
 
-A Chrome extension for copy-pasting Notion content to Velog with automatic image upload.
+노션 콘텐츠를 이미지 자동 업로드와 함께 벨로그에 바로 붙여넣기하는 크롬 확장 프로그램.
 
 ![preview](assets/preview.webp)
 
-Notion copies images as `![alt](attachment:UUID:filename)` — a format Velog cannot render. This extension intercepts the paste event on `velog.io/write`, uploads each image to the Velog CDN, and replaces the attachment URLs with the resulting CDN URLs before inserting the content into the editor.
+노션은 이미지를 `![alt](attachment:UUID:filename)` 형식으로 복사합니다. 벨로그는 이 형식을 렌더링하지 못해 이미지가 깨집니다. 이 확장 프로그램은 `velog.io/write`의 붙여넣기 이벤트를 인터셉트해 각 이미지를 벨로그 CDN에 업로드한 뒤 URL을 교체하고 에디터에 삽입합니다.
 
 ---
 
-## Requirements
+## 요구 사항
 
-- Chrome or Brave browser
-- A [Notion Integration Token](https://www.notion.so/my-integrations)
-- Logged in to [velog.io](https://velog.io)
-
----
-
-## Installation
-
-1. Clone or download this repository
-2. Open `chrome://extensions` in your browser
-3. Enable **Developer mode** (top-right toggle)
-4. Click **Load unpacked** and select the project folder
+- 크로뮴 기반 브라우저 (Chrome, Brave 등)
+- [Notion Integration Token](https://www.notion.so/my-integrations)
+- [velog.io](https://velog.io) 로그인 상태
 
 ---
 
-## Setup
+## 설치
 
-### 1. Create a Notion Integration
-
-1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
-2. Click **New integration** and give it a name
-3. Copy the **Internal Integration Token** (`ntn_...`)
-
-### 2. Connect the Integration to your Notion pages
-
-For each Notion page you want to copy from:
-
-1. Open the page in Notion
-2. Click **···** (top-right) → **Connections** → select your integration
-
-### 3. Save the token in the extension
-
-Click the extension icon in your browser toolbar, paste the token, and click **저장**.
+1. 이 저장소를 클론하거나 다운로드
+2. 브라우저에서 `chrome://extensions` 열기
+3. 우측 상단 **개발자 모드** 활성화
+4. **압축 해제된 확장 프로그램을 로드합니다** 클릭 후 프로젝트 폴더 선택
 
 ---
 
-## Usage
+## 초기 설정
 
-1. Open the Notion page you want to publish
-2. Press `Ctrl+A` → `Ctrl+C` to copy the entire page
-3. Go to `velog.io/write` and press `Ctrl+V`
-4. The extension automatically uploads all images and inserts the final markdown
+### 1. Notion Integration 생성
 
-A toast notification at the bottom-right shows progress and the result.
+1. [notion.so/my-integrations](https://www.notion.so/my-integrations) 접속
+2. **새 통합 만들기** 클릭 후 이름 입력
+3. **Internal Integration Token** (`ntn_...`) 복사
 
----
+### 2. Notion 페이지에 Integration 연결
 
-## How It Works
+복사할 노션 페이지마다:
 
-```
-notion.so                    background.js               velog.io/write
-─────────────────────────────────────────────────────────────────────────
-notion-content.js scans      FETCH_IMAGE:                content.js intercepts
-img[src] → saves             Notion API → S3 URL →       paste event →
-UUID→URL map to              download binary             replaces attachment
-chrome.storage.local                                     URLs with CDN URLs
-                             UPLOAD_TO_VELOG:            → injects processed
-                             executeScript(MAIN world)   markdown into editor
-                             → POST /api/v2/files/upload
-                             → returns CDN URL
-```
+1. 노션 페이지 우측 상단 **···** 클릭
+2. **Connections** → 생성한 Integration 선택
 
-**Why MAIN world for upload?**  
-Velog's upload API requires the `access_token` cookie and same-site request headers. Running `fetch` inside `chrome.scripting.executeScript` with `world: 'MAIN'` executes in the page's context, so the browser automatically attaches the session cookie.
+### 3. 확장 프로그램에 토큰 저장
 
-**New post vs. existing post**  
-- Editing an existing post (`velog.io/write?id=UUID`): uploads with `type=post` and `ref_id=UUID`
-- Writing a new post (no `?id=` param): uploads with `type=profile` as a fallback (images are still accessible and functional)
+브라우저 툴바에서 확장 아이콘을 클릭해 토큰을 붙여넣고 **저장**을 누릅니다.
 
 ---
 
-## File Structure
+## 사용 방법
 
-```
-notion_to_velog/
-├── manifest.json        MV3 manifest
-├── background.js        Service worker — image download & Velog upload
-├── content.js           velog.io/write — paste intercept & editor injection
-├── notion-content.js    notion.so — UUID→URL mapping collection
-├── popup.html           Extension popup UI
-└── popup.js             Token save/load logic
-```
+1. 게시할 노션 페이지 열기
+2. `Ctrl+A` → `Ctrl+C` 로 전체 복사
+3. `velog.io/write` 에서 `Ctrl+V` 붙여넣기
+4. 이미지가 자동으로 업로드되고 완성된 마크다운이 에디터에 삽입됩니다
+
+화면 우하단에 진행 상황과 결과를 알려주는 토스트 알림이 표시됩니다.
 
 ---
 
-## Notes
+## 주의 사항
 
-- The Notion Integration must be connected to the page before copying; otherwise block lookup will return 404.
-- S3 presigned URLs from Notion expire in ~1 hour — paste shortly after copying.
-- **Brave users**: Brave Shields must be disabled for `notion.so`. Click the Brave lion icon in the address bar while on a Notion page and toggle Shields off.
+- **Brave 사용자**: Notion 페이지에서 Brave Shields를 꺼야 합니다. 주소창의 Brave 라이온 아이콘을 클릭해 Shields를 비활성화하세요.
+- 복사 전에 Integration이 해당 페이지에 연결되어 있어야 합니다. 연결되지 않으면 block 조회 시 404 오류가 발생합니다.
+- 노션의 S3 presigned URL은 약 1시간 후 만료됩니다. 복사 후 바로 붙여넣기 하세요.
