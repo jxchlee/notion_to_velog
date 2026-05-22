@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Notion to Velog",
+  "version": "1.0.0",
+  "description": "Notion 콘텐츠를 이미지 포함 Velog에 바로 붙여넣기",
+  "permissions": [
+    "storage",
+    "cookies",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://velog.io/*",
+    "https://v2.velog.io/*",
+    "https://www.notion.so/*",
+    "https://*.notion.so/*",
+    "https://*.amazonaws.com/*",
+    "https://*.cloudfront.net/*",
+    "https://api.notion.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://velog.io/write*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.notion.so/*"],
+      "js": ["notion-content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Notion to Velog"
+  }
+}

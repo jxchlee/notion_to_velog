@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { width: 320px; font-family: -apple-system, 'Segoe UI', sans-serif; font-size: 14px; background: #f8f9fa; }
+    .header { background: #12b886; color: white; padding: 14px 16px; font-weight: 700; font-size: 15px; }
+    .header span { font-weight: 400; font-size: 12px; opacity: 0.85; margin-left: 6px; }
+    .section { padding: 14px 16px; border-bottom: 1px solid #dee2e6; }
+    .section-title { font-weight: 600; margin-bottom: 8px; color: #212529; }
+    .token-row { display: flex; gap: 6px; }
+    .token-row input {
+      flex: 1; padding: 7px 10px; border: 1px solid #ced4da;
+      border-radius: 6px; font-size: 12px; font-family: monospace;
+      background: #fff;
+    }
+    .token-row input:focus { outline: none; border-color: #12b886; }
+    .btn {
+      padding: 7px 12px; background: #12b886; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 13px; white-space: nowrap;
+    }
+    .btn:hover { background: #0ca678; }
+    .status { font-size: 12px; margin-top: 6px; min-height: 16px; }
+    .status.ok { color: #12b886; }
+    .status.err { color: #e03131; }
+    .note { background: #fff3cd; border-left: 3px solid #f76707; padding: 8px 10px; border-radius: 0 6px 6px 0; font-size: 11px; color: #664d03; line-height: 1.5; margin-top: 8px; }
+    .steps { padding: 12px 16px; }
+    .steps .title { font-weight: 600; margin-bottom: 8px; }
+    .step { display: flex; gap: 8px; margin-bottom: 7px; align-items: flex-start; font-size: 12px; color: #495057; line-height: 1.5; }
+    .num { background: #12b886; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    code { background: #e9ecef; padding: 1px 4px; border-radius: 3px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="header">Notion to Velog <span>v1.0.0</span></div>
+
+  <div class="section">
+    <div class="section-title">Notion Integration Token</div>
+    <div class="token-row">
+      <input id="tokenInput" type="password" placeholder="ntn_xxxxxxxxxxxxxxxx..." />
+      <button class="btn" id="saveBtn">저장</button>
+    </div>
+    <div class="status" id="tokenStatus"></div>
+    <div class="note">
+      <strong>토큰 설정 방법:</strong><br>
+      1. <a href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → 새 통합 만들기<br>
+      2. 토큰 복사 후 위에 입력<br>
+      3. Notion 페이지 → ··· → Connections → 통합 추가
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="title">사용 방법</div>
+    <div class="step"><div class="num">1</div><div>Notion에서 <code>Ctrl+A</code> → <code>Ctrl+C</code></div></div>
+    <div class="step"><div class="num">2</div><div>Velog 글쓰기에서 <code>Ctrl+V</code></div></div>
+    <div class="step"><div class="num">3</div><div>이미지 자동 업로드 완료</div></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
