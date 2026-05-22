@@ -48,29 +48,28 @@ async function uploadViaMainWorld(tabId, imageData, filename) {
     func: (data, mimeType, fname) => {
       const blob = new Blob([new Uint8Array(data)], { type: mimeType });
       const ext = fname.split('.').pop().toLowerCase() || 'png';
-      const fd = new FormData();
-
-      // ref_id: 현재 편집 중인 글의 UUID. 없으면 profile 타입으로 폴백
       const refId = new URLSearchParams(window.location.search).get('id');
-      if (refId) {
-        fd.append('type', 'post');
-        fd.append('ref_id', refId);
-      } else {
-        fd.append('type', 'profile');
-      }
 
-      fd.append('image', blob, `image.${ext}`);
-
-      const doUpload = () => fetch('https://v2.velog.io/api/v2/files/upload', {
-        method: 'POST',
-        body: fd,
-        credentials: 'include'
-      })
-        .then(r => {
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          return r.json();
+      const doUpload = () => {
+        const fd = new FormData();
+        if (refId) {
+          fd.append('type', 'post');
+          fd.append('ref_id', refId);
+        } else {
+          fd.append('type', 'profile');
+        }
+        fd.append('image', blob, `image.${ext}`);
+        return fetch('https://v2.velog.io/api/v2/files/upload', {
+          method: 'POST',
+          body: fd,
+          credentials: 'include'
         })
-        .then(d => d.url ?? d.image_url ?? d.path);
+          .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+          })
+          .then(d => d.url ?? d.image_url ?? d.path);
+      };
 
       // 429 등 실패 시 2초 대기 후 1회 재시도
       return doUpload().catch(
