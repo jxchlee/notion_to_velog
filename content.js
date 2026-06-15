@@ -30,14 +30,24 @@
 
     if (attachments.length === 0) {
       // 신버전 포맷: text/plain에는 "!filename"만 있고, UUID는 text/html의 <img>에 있음
-      // → text/html에서 UUID/alt를 추출해 text/plain의 "!filename"을 보강
-      const htmlImages = [...html.matchAll(HTML_IMG_RE)];
-      for (const [, uuid, filename, alt] of htmlImages) {
-        const placeholder = `!${filename}`;
-        if (plainText.includes(placeholder)) {
-          plainText = plainText.replace(placeholder, `![${alt}](attachment:${uuid}:${filename})`);
-        }
+      // → text/html에서 UUID/alt를 파일명별 큐로 추출 후, text/plain의 "!filename.ext"를
+      //   문서 순서대로(같은 파일명이 여러 개여도 큐 순서대로) 치환
+      const queues = new Map();
+      for (const [, uuid, filename, alt] of html.matchAll(HTML_IMG_RE)) {
+        if (!queues.has(filename)) queues.set(filename, []);
+        queues.get(filename).push({ uuid, alt });
       }
+
+      if (queues.size > 0) {
+        const PLACEHOLDER_RE = /!([^\s!"'()<>]+\.(?:png|jpe?g|gif|webp|svg|bmp))/gi;
+        plainText = plainText.replace(PLACEHOLDER_RE, (match, filename) => {
+          const queue = queues.get(filename);
+          if (!queue || queue.length === 0) return match;
+          const { uuid, alt } = queue.shift();
+          return `![${alt}](attachment:${uuid}:${filename})`;
+        });
+      }
+
       attachments = [...plainText.matchAll(ATTACHMENT_RE)];
     }
 
