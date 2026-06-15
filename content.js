@@ -1,8 +1,10 @@
 (function () {
   'use strict';
 
-  // ![alt](attachment:UUID:filename) 패턴
+  // ![alt](attachment:UUID:filename) 패턴 (구버전 text/plain 포맷)
   const ATTACHMENT_RE = /!\[([^\]]*)\]\(attachment:([a-f0-9-]{36}):([^)]+)\)/g;
+  // <img src="attachment:UUID:filename" alt="alt"> 패턴 (신버전 text/html 포맷)
+  const HTML_IMG_RE = /<img src="attachment:([a-f0-9-]{36}):([^"]+)" alt="([^"]*)">/g;
   // Notion 이미지 URL에서 UUID 추출: attachment%3AUUID%3A or attachment:UUID:
   const NOTION_UUID_RE = /attachment(?:%3A|:)([a-f0-9-]{36})(?:%3A|:)/i;
 
@@ -23,7 +25,22 @@
     if (editorParent && !editorParent.contains(pasteTarget)) return;
 
     // Notion attachment 형식이 없으면 평소대로 처리
-    const attachments = [...text.matchAll(ATTACHMENT_RE)];
+    let plainText = text;
+    let attachments = [...plainText.matchAll(ATTACHMENT_RE)];
+
+    if (attachments.length === 0) {
+      // 신버전 포맷: text/plain에는 "!filename"만 있고, UUID는 text/html의 <img>에 있음
+      // → text/html에서 UUID/alt를 추출해 text/plain의 "!filename"을 보강
+      const htmlImages = [...html.matchAll(HTML_IMG_RE)];
+      for (const [, uuid, filename, alt] of htmlImages) {
+        const placeholder = `!${filename}`;
+        if (plainText.includes(placeholder)) {
+          plainText = plainText.replace(placeholder, `![${alt}](attachment:${uuid}:${filename})`);
+        }
+      }
+      attachments = [...plainText.matchAll(ATTACHMENT_RE)];
+    }
+
     if (attachments.length === 0) {
       console.log('[N2V] attachment 패턴 매칭 안됨. clipboard text/plain:', JSON.stringify(text.slice(0, 500)));
       console.log('[N2V] clipboard text/html:', JSON.stringify(html.slice(0, 500)));
@@ -46,7 +63,7 @@
         return;
       }
 
-      let processed = text;
+      let processed = plainText;
       let successCount = 0;
       const failed = [];
 
