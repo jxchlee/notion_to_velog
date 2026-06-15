@@ -24,7 +24,11 @@
 
     // Notion attachment 형식이 없으면 평소대로 처리
     const attachments = [...text.matchAll(ATTACHMENT_RE)];
-    if (attachments.length === 0) return;
+    if (attachments.length === 0) {
+      console.log('[N2V] attachment 패턴 매칭 안됨. clipboard text/plain:', JSON.stringify(text.slice(0, 500)));
+      console.log('[N2V] clipboard text/html:', JSON.stringify(html.slice(0, 500)));
+      return;
+    }
 
     event.preventDefault();
     event.stopImmediatePropagation();
