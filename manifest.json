@@ -14,6 +14,7 @@
     "https://v2.velog.io/*",
     "https://www.notion.so/*",
     "https://*.notion.so/*",
+    "https://app.notion.com/*",
     "https://*.amazonaws.com/*",
     "https://*.cloudfront.net/*",
     "https://api.notion.com/*"
@@ -25,7 +26,7 @@
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://www.notion.so/*"],
+      "matches": ["https://www.notion.so/*", "https://app.notion.com/*"],
       "js": ["notion-content.js"],
       "run_at": "document_idle"
     }
