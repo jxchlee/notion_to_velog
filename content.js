@@ -66,12 +66,8 @@
       showToast(`⏳ Notion 이미지 처리 중... (총 ${attachments.length}개)`);
 
       // Notion 페이지에서 미리 저장해둔 UUID → URL 매핑 조회
+      // 없으면 UUID를 직접 Notion API block ID로 사용 (클립보드 UUID = 블록 ID)
       const urlMap = await getNotionUrlMap();
-      if (Object.keys(urlMap).length === 0) {
-        showToast('⚠️ Notion 이미지 URL을 찾지 못했습니다.\nNotion 탭을 열고 해당 페이지를 스크롤한 뒤 다시 복사해주세요.', 'warn', 6000);
-        isProcessing = false;
-        return;
-      }
 
       let processed = plainText;
       let successCount = 0;
@@ -82,11 +78,7 @@
 
         updateToast(`⏳ 이미지 업로드 중... (${i + 1} / ${attachments.length})`);
 
-        const notionUrl = urlMap[uuid];
-        if (!notionUrl) {
-          failed.push({ uuid, reason: 'HTML 클립보드에서 URL을 찾을 수 없음' });
-          continue;
-        }
+        const notionUrl = urlMap[uuid] ?? `https://www.notion.so/image/?id=${uuid}`;
 
         try {
           const imageData = await fetchImageFromBackground(notionUrl);
