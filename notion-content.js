@@ -11,6 +11,9 @@ function captureImg(img) {
   if (match && !imageMap[match[1]]) {
     imageMap[match[1]] = img.src;
     chrome.storage.local.set({ notionImageMap: { ...imageMap } });
+    console.log('[N2V] 이미지 캡처 성공:', match[1], img.src.slice(0, 120));
+  } else if (!match && img.src.startsWith('http')) {
+    console.log('[N2V] UUID 매칭 실패 - img src:', img.src.slice(0, 120));
   }
 }
 
